@@ -239,7 +239,6 @@ h1 em { color: var(--lime); font-style: normal; }
 .answer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
 .answer-button { min-height: 58px; padding: 0.8rem 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-light); color: var(--text); font-weight: 700; }
 .answer-button:hover { transform: translateY(-2px); border-color: rgba(199, 244, 91, 0.6); background: #1c304a; }
-.answer-button kbd { margin-left: 0.4rem; color: var(--muted); font-family: "DM Mono", monospace; font-size: 0.68rem; }
 .feedback { min-height: 1.5rem; margin: 0.75rem 0 0; text-align: center; color: var(--lime); font-size: 0.78rem; }
 .feedback.is-wrong { color: var(--coral); }
 
@@ -253,6 +252,19 @@ h1 em { color: var(--lime); font-style: normal; }
 .result-metrics span, .result-metrics strong { display: block; }
 .result-metrics span { color: var(--muted); font-size: 0.7rem; }
 .result-metrics strong { margin-top: 0.15rem; font-family: "DM Mono", monospace; }
+.round-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; margin: 1rem auto; }
+.round-results div { padding: 0.7rem 0.45rem; border: 1px solid var(--line); border-radius: 12px; background: rgba(0, 0, 0, 0.1); }
+.round-results span, .round-results strong { display: block; }
+.round-results span { color: var(--muted); font-size: 0.7rem; }
+.round-results strong { margin-top: 0.15rem; color: var(--lime); font-family: "DM Mono", monospace; }
+.history-panel { margin: 1.25rem auto; text-align: left; }
+.history-panel h3 { margin: 0 0 0.55rem; font-size: 0.8rem; letter-spacing: 0.06em; }
+.history-table-wrap { max-height: 180px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; }
+.history-panel table { width: 100%; border-collapse: collapse; font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.history-panel th, .history-panel td { padding: 0.55rem 0.6rem; text-align: center; white-space: nowrap; }
+.history-panel th { position: sticky; top: 0; background: #15243a; color: var(--muted); font-weight: 500; }
+.history-panel tbody tr + tr { border-top: 1px solid var(--line); }
+.history-panel td:first-child, .history-panel th:first-child { text-align: left; }
 .secondary-button { padding: 0.75rem 1.1rem; border: 1px solid var(--line); border-radius: 99px; background: transparent; color: var(--text); font-size: 0.84rem; }
 .secondary-button:hover { border-color: var(--lime); color: var(--lime); }
 
@@ -285,6 +297,9 @@ footer { min-height: 64px; display: flex; justify-content: space-between; align-
   .timer { font-size: 2.75rem; }
   .round-meta { display: grid; justify-content: start; text-align: left; gap: 0.1rem; }
   .challenge { min-height: 145px; }
+  .round-results { gap: 0.35rem; }
+  .round-results div { padding-inline: 0.25rem; }
+  .history-panel th, .history-panel td { padding-inline: 0.45rem; }
   .science-note { align-items: flex-start; text-align: left; }
   footer > span:first-child { max-width: 70%; }
 }

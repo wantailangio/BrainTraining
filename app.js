@@ -26,6 +26,8 @@
     resultStreak: document.querySelector("#resultStreak"),
     resultTitle: document.querySelector("#resultTitle"),
     resultMessage: document.querySelector("#resultMessage"),
+    roundAccuracies: [0, 1, 2].map((index) => document.querySelector(`#roundAccuracy${index}`)),
+    historyRows: document.querySelector("#historyRows"),
     maps: [...document.querySelectorAll("[data-map-step]")],
   };
 
@@ -37,6 +39,8 @@
   let currentRound = -1;
   let correctAnswer = "";
   let previousSymbol = "";
+  let previousSymbolColor = "";
+  let roundStats = [];
   let acceptingAnswer = false;
 
   const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
@@ -79,12 +83,12 @@
     nextChallenge();
   }
 
-  function createAnswerButton(label, value, key) {
+  function createAnswerButton(label, value) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "answer-button";
     button.dataset.value = value;
-    button.innerHTML = `${label}<kbd>${key}</kbd>`;
+    button.textContent = label;
     button.addEventListener("click", () => submitAnswer(value));
     return button;
   }
@@ -118,7 +122,7 @@
     correctAnswer = String(answer);
     els.instruction.textContent = "暗算して答えを選ぶ";
     els.challenge.innerHTML = `<div class="calculation"><span>${left}</span><span class="operator">${operator}</span><span>${right}</span></div>`;
-    els.answers.replaceChildren(...shuffled.map((choice, index) => createAnswerButton(String(choice), String(choice), index + 1)));
+    els.answers.replaceChildren(...shuffled.map((choice) => createAnswerButton(String(choice), String(choice))));
     acceptingAnswer = true;
   }
 
@@ -128,24 +132,32 @@
     if (!same && previousSymbol) {
       while (symbol === previousSymbol) symbol = randomItem(symbols);
     }
-    let startX = Math.floor(Math.random() * 26) + 5;
-    const startY = Math.floor(Math.random() * 17) + 3;
-    let endX = Math.floor(Math.random() * 26) + 58;
-    const endY = Math.floor(Math.random() * 17) + 3;
-    if (Math.random() < 0.5) [startX, endX] = [endX, startX];
-    const driftTime = (Math.random() * 0.8 + 1.35).toFixed(2);
-    const symbolColor = randomItem(symbolColors);
+    let symbolColor = randomItem(symbolColors);
+    while (symbolColor === previousSymbolColor) symbolColor = randomItem(symbolColors);
     els.instruction.textContent = "動く記号を追って、ひとつ前と比べる";
-    els.challenge.innerHTML = `<div class="memory-field"><span class="memory-symbol" style="--start-x:${startX}%;--start-y:${startY}%;--end-x:${endX}%;--end-y:${endY}%;--drift-time:${driftTime}s;--symbol-color:${symbolColor}">${symbol}</span></div>`;
-    const answerOptions = Math.random() < 0.5
-      ? [["同じ", "same"], ["ちがう", "different"]]
-      : [["ちがう", "different"], ["同じ", "same"]];
-    els.answers.replaceChildren(...answerOptions.map(([label, value], index) => createAnswerButton(label, value, index + 1)));
+    let symbolElement = els.challenge.querySelector(".memory-symbol");
+    if (!symbolElement) {
+      let startX = Math.floor(Math.random() * 26) + 5;
+      const startY = Math.floor(Math.random() * 17) + 3;
+      let endX = Math.floor(Math.random() * 26) + 58;
+      const endY = Math.floor(Math.random() * 17) + 3;
+      if (Math.random() < 0.5) [startX, endX] = [endX, startX];
+      const driftTime = (Math.random() * 0.8 + 1.35).toFixed(2);
+      els.challenge.innerHTML = `<div class="memory-field"><span class="memory-symbol" style="--start-x:${startX}%;--start-y:${startY}%;--end-x:${endX}%;--end-y:${endY}%;--drift-time:${driftTime}s"></span></div>`;
+      symbolElement = els.challenge.querySelector(".memory-symbol");
+    }
+    symbolElement.textContent = symbol;
+    symbolElement.style.setProperty("--symbol-color", symbolColor);
+    els.answers.replaceChildren(
+      createAnswerButton("同じ", "same"),
+      createAnswerButton("ちがう", "different"),
+    );
     if (!previousSymbol) {
       acceptingAnswer = false;
       els.answers.querySelectorAll("button").forEach((button) => { button.disabled = true; });
       els.feedback.textContent = "この記号を覚えてください";
       previousSymbol = symbol;
+      previousSymbolColor = symbolColor;
       window.setTimeout(() => {
         if (state === "running" && currentRound === 1) nextChallenge();
       }, 1100);
@@ -153,6 +165,7 @@
     }
     correctAnswer = same ? "same" : "different";
     previousSymbol = symbol;
+    previousSymbolColor = symbolColor;
     acceptingAnswer = true;
   }
 
@@ -162,11 +175,11 @@
     const valid = candidates.filter((n) => (rule === "偶数" ? n % 2 === 0 : n % 2 === 1));
     if (!valid.length) candidates[Math.floor(Math.random() * 4)] = rule === "偶数" ? 4 : 5;
     correctAnswer = rule;
-    els.instruction.textContent = "ルールに合う数字をひとつ選ぶ";
-    els.challenge.innerHTML = `<div class="switch-prompt"><small>今回のルール</small><strong>${rule}を選ぶ</strong></div>`;
-    els.answers.replaceChildren(...candidates.map((number, index) => {
+    els.instruction.textContent = "ルールに合う数字をタップ";
+    els.challenge.innerHTML = `<div class="switch-prompt"><strong>${rule}</strong></div>`;
+    els.answers.replaceChildren(...candidates.map((number) => {
       const kind = number % 2 === 0 ? "偶数" : "奇数";
-      return createAnswerButton(String(number), kind, index + 1);
+      return createAnswerButton(String(number), kind);
     }));
     acceptingAnswer = true;
   }
@@ -184,9 +197,11 @@
     if (!acceptingAnswer || state !== "running") return;
     acceptingAnswer = false;
     attempts += 1;
+    roundStats[currentRound].attempts += 1;
     const isCorrect = value === correctAnswer;
     if (isCorrect) {
       score += 1;
+      roundStats[currentRound].correct += 1;
       els.score.textContent = String(score);
       els.feedback.textContent = "GOOD";
     } else {
@@ -214,8 +229,10 @@
     state = "running";
     score = 0;
     attempts = 0;
+    roundStats = Array.from({ length: 3 }, () => ({ correct: 0, attempts: 0 }));
     currentRound = -1;
     previousSymbol = "";
+    previousSymbolColor = "";
     startedAt = Date.now();
     els.score.textContent = "0";
     els.timer.textContent = "03:00";
@@ -227,16 +244,36 @@
     timerId = window.setInterval(tick, 250);
   }
 
-  function saveResult(accuracy) {
+  function roundAccuracy(stat) {
+    return stat.attempts ? Math.round((stat.correct / stat.attempts) * 100) : 0;
+  }
+
+  function saveResult(accuracy, rounds) {
     const history = loadHistory();
     const today = localDate();
     const existing = history.find((item) => item.date === today);
     if (existing) {
-      if (score > existing.score) Object.assign(existing, { score, accuracy });
+      Object.assign(existing, { score, accuracy, rounds });
     } else {
-      history.push({ date: today, score, accuracy });
+      history.push({ date: today, score, accuracy, rounds });
     }
-    localStorage.setItem("threeMinFocusHistory", JSON.stringify(history.slice(-90)));
+    const retained = history.slice(-90);
+    localStorage.setItem("threeMinFocusHistory", JSON.stringify(retained));
+    return retained;
+  }
+
+  function renderHistory(history) {
+    els.historyRows.replaceChildren();
+    [...history].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 14).forEach((item) => {
+      const row = document.createElement("tr");
+      const values = [item.date.replaceAll("-", "/"), ...(item.rounds || [null, null, null]), item.accuracy];
+      values.forEach((value, index) => {
+        const cell = document.createElement("td");
+        cell.textContent = index === 0 ? value : Number.isFinite(value) ? `${value}%` : "—";
+        row.append(cell);
+      });
+      els.historyRows.append(row);
+    });
   }
 
   function finishTraining() {
@@ -245,7 +282,8 @@
     window.clearInterval(timerId);
     acceptingAnswer = false;
     const accuracy = attempts ? Math.round((score / attempts) * 100) : 0;
-    saveResult(accuracy);
+    const roundAccuracies = roundStats.map(roundAccuracy);
+    const history = saveResult(accuracy, roundAccuracies);
     updateStreak();
     els.timer.textContent = "00:00";
     els.progress.style.width = "100%";
@@ -253,6 +291,8 @@
     els.result.hidden = false;
     els.finalScore.textContent = String(score);
     els.accuracy.textContent = `${accuracy}%`;
+    els.roundAccuracies.forEach((element, index) => { element.textContent = `${roundAccuracies[index]}%`; });
+    renderHistory(history);
     els.resultStreak.textContent = `${calculateStreak()}日`;
     els.resultTitle.textContent = accuracy >= 85 ? "冴えています。" : accuracy >= 65 ? "今日の調整、完了。" : "集中の土台ができました。";
     els.resultMessage.textContent = accuracy >= 85 ? "速さと正確さのバランスが取れています。" : "続けるほど、切り替えが自然になっていきます。";
@@ -271,7 +311,7 @@
     const context = document.modelContext;
     if (!context?.registerTool) return;
     const signal = new AbortController().signal;
-    const report = () => ({ state, remainingSeconds: state === "running" ? Math.max(0, Math.ceil(SESSION_SECONDS - (Date.now() - startedAt) / 1000)) : state === "complete" ? 0 : SESSION_SECONDS, score, attempts, streak: calculateStreak() });
+    const report = () => ({ state, remainingSeconds: state === "running" ? Math.max(0, Math.ceil(SESSION_SECONDS - (Date.now() - startedAt) / 1000)) : state === "complete" ? 0 : SESSION_SECONDS, score, attempts, roundAccuracies: roundStats.map(roundAccuracy), streak: calculateStreak() });
     try {
       void Promise.resolve(context.registerTool({
         name: "start_daily_training",

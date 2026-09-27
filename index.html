@@ -85,6 +85,22 @@
                 <div><span>正確性</span><strong id="accuracy">0%</strong></div>
                 <div><span>今日の継続</span><strong id="resultStreak">1日</strong></div>
               </div>
+              <div class="round-results" aria-label="ラウンド別正解率">
+                <div><span>暗算集中</span><strong id="roundAccuracy0">0%</strong></div>
+                <div><span>作業記憶</span><strong id="roundAccuracy1">0%</strong></div>
+                <div><span>認知の切替</span><strong id="roundAccuracy2">0%</strong></div>
+              </div>
+              <div class="history-panel">
+                <h3>毎日の記録</h3>
+                <div class="history-table-wrap">
+                  <table>
+                    <thead>
+                      <tr><th>日付</th><th>暗算</th><th>記憶</th><th>切替</th><th>総合</th></tr>
+                    </thead>
+                    <tbody id="historyRows"></tbody>
+                  </table>
+                </div>
+              </div>
               <button class="secondary-button" id="retryButton" type="button">もう一度挑戦</button>
             </div>
           </div>
@@ -114,7 +130,7 @@
 
     <footer>
       <span>データはこの端末だけに保存されます</span>
-      <span class="version">v0.2.0</span>
+      <span class="version">v0.3.0</span>
     </footer>
 
     <script src="app.js"></script>
