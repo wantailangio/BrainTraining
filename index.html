@@ -37,23 +37,9 @@
           <p class="eyebrow">DAILY BRAIN TUNING</p>
           <h1 id="pageTitle">頭のノイズを、<br /><em>3分</em>で整える。</h1>
           <p class="lead">
-            3つの短い課題で、集中・記憶・判断を切り替えます。<br />速さより、正確さを意識してください。
+            3つの短い課題で、計算・記憶・判断を切り替えます。<br />速さより、正確さを意識してください。
           </p>
 
-          <div class="session-map" aria-label="トレーニング内容">
-            <div class="session-item is-active" data-map-step="0">
-              <span class="session-number">01</span>
-              <span><b>選択的注意</b><small>文字に惑わされず色を見る</small></span>
-            </div>
-            <div class="session-item" data-map-step="1">
-              <span class="session-number">02</span>
-              <span><b>作業記憶</b><small>ひとつ前の記号を覚える</small></span>
-            </div>
-            <div class="session-item" data-map-step="2">
-              <span class="session-number">03</span>
-              <span><b>認知の切替</b><small>変化するルールに反応する</small></span>
-            </div>
-          </div>
         </div>
 
         <div class="game-card" id="gameCard">
@@ -83,7 +69,7 @@
             <div class="play-state" id="playState" hidden>
               <div class="round-meta">
                 <span id="roundLabel">ROUND 1 / 3</span>
-                <span id="instruction">文字の「色」を選ぶ</span>
+                <span id="instruction">暗算して答えを選ぶ</span>
               </div>
               <div class="challenge" id="challenge" aria-live="polite"></div>
               <div class="answer-grid" id="answerGrid"></div>
@@ -103,6 +89,21 @@
             </div>
           </div>
         </div>
+
+        <div class="session-map" aria-label="トレーニング内容">
+          <div class="session-item is-active" data-map-step="0">
+            <span class="session-number">01</span>
+            <span><b>暗算集中</b><small>シンプルな計算に集中する</small></span>
+          </div>
+          <div class="session-item" data-map-step="1">
+            <span class="session-number">02</span>
+            <span><b>作業記憶</b><small>動く記号を追って覚える</small></span>
+          </div>
+          <div class="session-item" data-map-step="2">
+            <span class="session-number">03</span>
+            <span><b>認知の切替</b><small>変化するルールに反応する</small></span>
+          </div>
+        </div>
       </section>
 
       <p class="science-note">
@@ -113,7 +114,7 @@
 
     <footer>
       <span>データはこの端末だけに保存されます</span>
-      <span class="version">v0.1.0</span>
+      <span class="version">v0.2.0</span>
     </footer>
 
     <script src="app.js"></script>

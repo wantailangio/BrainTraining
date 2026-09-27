@@ -3,13 +3,8 @@
 
   const SESSION_SECONDS = 180;
   const ROUND_SECONDS = 60;
-  const colors = [
-    { name: "あか", value: "#ff715b" },
-    { name: "あお", value: "#46d7e9" },
-    { name: "みどり", value: "#c7f45b" },
-    { name: "むらさき", value: "#bd8cff" },
-  ];
   const symbols = ["●", "▲", "■", "◆", "✦"];
+  const symbolColors = ["#c7f45b", "#46d7e9", "#ff715b", "#bd8cff"];
 
   const els = {
     timer: document.querySelector("#timer"),
@@ -94,14 +89,36 @@
     return button;
   }
 
-  function showStroop() {
-    const word = randomItem(colors);
-    let ink = randomItem(colors);
-    while (ink.name === word.name) ink = randomItem(colors);
-    correctAnswer = ink.name;
-    els.instruction.textContent = "文字の意味ではなく「色」を選ぶ";
-    els.challenge.innerHTML = `<span class="stroop-word" style="color:${ink.value}">${word.name}</span>`;
-    els.answers.replaceChildren(...colors.map((color, index) => createAnswerButton(color.name, color.name, index + 1)));
+  function showCalculation() {
+    const operator = randomItem(["+", "−", "×"]);
+    let left;
+    let right;
+    let answer;
+    if (operator === "+") {
+      left = Math.floor(Math.random() * 28) + 4;
+      right = Math.floor(Math.random() * 18) + 3;
+      answer = left + right;
+    } else if (operator === "−") {
+      left = Math.floor(Math.random() * 28) + 14;
+      right = Math.floor(Math.random() * (left - 2)) + 2;
+      answer = left - right;
+    } else {
+      left = Math.floor(Math.random() * 8) + 2;
+      right = Math.floor(Math.random() * 8) + 2;
+      answer = left * right;
+    }
+
+    const choices = new Set([answer]);
+    const offsets = [-5, -3, -2, -1, 1, 2, 3, 5];
+    while (choices.size < 4) {
+      const candidate = answer + randomItem(offsets);
+      if (candidate >= 0) choices.add(candidate);
+    }
+    const shuffled = [...choices].sort(() => Math.random() - 0.5);
+    correctAnswer = String(answer);
+    els.instruction.textContent = "暗算して答えを選ぶ";
+    els.challenge.innerHTML = `<div class="calculation"><span>${left}</span><span class="operator">${operator}</span><span>${right}</span></div>`;
+    els.answers.replaceChildren(...shuffled.map((choice, index) => createAnswerButton(String(choice), String(choice), index + 1)));
     acceptingAnswer = true;
   }
 
@@ -111,12 +128,19 @@
     if (!same && previousSymbol) {
       while (symbol === previousSymbol) symbol = randomItem(symbols);
     }
-    els.instruction.textContent = "ひとつ前と同じ記号？";
-    els.challenge.innerHTML = `<span class="memory-symbol">${symbol}</span>`;
-    els.answers.replaceChildren(
-      createAnswerButton("同じ", "same", 1),
-      createAnswerButton("ちがう", "different", 2),
-    );
+    let startX = Math.floor(Math.random() * 26) + 5;
+    const startY = Math.floor(Math.random() * 17) + 3;
+    let endX = Math.floor(Math.random() * 26) + 58;
+    const endY = Math.floor(Math.random() * 17) + 3;
+    if (Math.random() < 0.5) [startX, endX] = [endX, startX];
+    const driftTime = (Math.random() * 0.8 + 1.35).toFixed(2);
+    const symbolColor = randomItem(symbolColors);
+    els.instruction.textContent = "動く記号を追って、ひとつ前と比べる";
+    els.challenge.innerHTML = `<div class="memory-field"><span class="memory-symbol" style="--start-x:${startX}%;--start-y:${startY}%;--end-x:${endX}%;--end-y:${endY}%;--drift-time:${driftTime}s;--symbol-color:${symbolColor}">${symbol}</span></div>`;
+    const answerOptions = Math.random() < 0.5
+      ? [["同じ", "same"], ["ちがう", "different"]]
+      : [["ちがう", "different"], ["同じ", "same"]];
+    els.answers.replaceChildren(...answerOptions.map(([label, value], index) => createAnswerButton(label, value, index + 1)));
     if (!previousSymbol) {
       acceptingAnswer = false;
       els.answers.querySelectorAll("button").forEach((button) => { button.disabled = true; });
@@ -151,7 +175,7 @@
     if (state !== "running") return;
     els.feedback.innerHTML = "&nbsp;";
     els.feedback.classList.remove("is-wrong");
-    if (currentRound === 0) showStroop();
+    if (currentRound === 0) showCalculation();
     if (currentRound === 1) showMemory();
     if (currentRound === 2) showSwitch();
   }
