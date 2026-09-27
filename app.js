@@ -3,7 +3,7 @@
 
   const SESSION_SECONDS = 180;
   const ROUND_SECONDS = 60;
-  const symbols = ["●", "▲", "■", "◆", "✦"];
+  const symbols = ["▲", "■", "◆", "✦", "⬟"];
   const symbolColors = ["#c7f45b", "#46d7e9", "#ff715b", "#bd8cff"];
 
   const els = {
@@ -143,30 +143,36 @@
       const endY = Math.floor(Math.random() * 17) + 3;
       if (Math.random() < 0.5) [startX, endX] = [endX, startX];
       const driftTime = (Math.random() * 0.8 + 1.35).toFixed(2);
-      els.challenge.innerHTML = `<div class="memory-field"><span class="memory-symbol" style="--start-x:${startX}%;--start-y:${startY}%;--end-x:${endX}%;--end-y:${endY}%;--drift-time:${driftTime}s"></span></div>`;
+      els.challenge.innerHTML = `<div class="memory-field"><span class="memory-mover" style="--start-x:${startX}%;--start-y:${startY}%;--end-x:${endX}%;--end-y:${endY}%;--drift-time:${driftTime}s"><span class="memory-symbol"></span></span></div>`;
       symbolElement = els.challenge.querySelector(".memory-symbol");
     }
-    symbolElement.textContent = symbol;
-    symbolElement.style.setProperty("--symbol-color", symbolColor);
+    if (!previousSymbol) {
+      symbolElement.textContent = symbol;
+      symbolElement.style.setProperty("--symbol-color", symbolColor);
+      els.answers.replaceChildren(createAnswerButton("次へ", "next"));
+      els.feedback.textContent = "この記号を覚えてください";
+      previousSymbol = symbol;
+      previousSymbolColor = symbolColor;
+      correctAnswer = "next";
+      acceptingAnswer = true;
+      return;
+    }
+    correctAnswer = same ? "same" : "different";
     els.answers.replaceChildren(
       createAnswerButton("同じ", "same"),
       createAnswerButton("ちがう", "different"),
     );
-    if (!previousSymbol) {
-      acceptingAnswer = false;
-      els.answers.querySelectorAll("button").forEach((button) => { button.disabled = true; });
-      els.feedback.textContent = "この記号を覚えてください";
+    acceptingAnswer = false;
+    symbolElement.classList.add("is-changing");
+    window.setTimeout(() => {
+      if (state !== "running" || currentRound !== 1) return;
+      symbolElement.textContent = symbol;
+      symbolElement.style.setProperty("--symbol-color", symbolColor);
       previousSymbol = symbol;
       previousSymbolColor = symbolColor;
-      window.setTimeout(() => {
-        if (state === "running" && currentRound === 1) nextChallenge();
-      }, 1100);
-      return;
-    }
-    correctAnswer = same ? "same" : "different";
-    previousSymbol = symbol;
-    previousSymbolColor = symbolColor;
-    acceptingAnswer = true;
+      symbolElement.classList.remove("is-changing");
+      acceptingAnswer = true;
+    }, 180);
   }
 
   function showSwitch() {
@@ -196,6 +202,11 @@
   function submitAnswer(value) {
     if (!acceptingAnswer || state !== "running") return;
     acceptingAnswer = false;
+    if (value === "next") {
+      els.feedback.innerHTML = "&nbsp;";
+      window.setTimeout(nextChallenge, 180);
+      return;
+    }
     attempts += 1;
     roundStats[currentRound].attempts += 1;
     const isCorrect = value === correctAnswer;

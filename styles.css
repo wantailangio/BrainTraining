@@ -214,21 +214,34 @@ h1 em { color: var(--lime); font-style: normal; }
 .calculation { display: flex; align-items: center; gap: 0.45em; font-family: "DM Mono", monospace; font-size: clamp(3.3rem, 9vw, 5.7rem); font-weight: 500; letter-spacing: -0.08em; line-height: 1; }
 .calculation .operator { color: var(--lime); }
 .memory-field { position: relative; width: 100%; height: 150px; overflow: hidden; border-radius: 20px; background: radial-gradient(circle at center, rgba(70, 215, 233, 0.06), transparent 62%); }
-.memory-symbol {
+.memory-mover {
   position: absolute;
   left: var(--start-x);
   top: var(--start-y);
+  animation: symbol-drift var(--drift-time) ease-in-out infinite alternate;
+  will-change: left, top;
+}
+.memory-symbol {
+  display: block;
   color: var(--symbol-color);
   font-size: clamp(4.6rem, 10vw, 7rem);
   line-height: 1;
   text-shadow: 0 0 42px color-mix(in srgb, var(--symbol-color), transparent 70%);
-  animation: symbol-drift var(--drift-time) ease-in-out infinite alternate;
-  will-change: left, top, transform;
+  animation: symbol-spin 2.2s linear infinite;
+  transform-origin: center;
+  transition: opacity 180ms ease, filter 180ms ease;
+  will-change: transform, opacity, filter;
 }
+.memory-symbol.is-changing { opacity: 0; filter: blur(7px); }
 
 @keyframes symbol-drift {
-  from { left: var(--start-x); top: var(--start-y); transform: rotate(-8deg) scale(0.94); }
-  to { left: var(--end-x); top: var(--end-y); transform: rotate(8deg) scale(1.04); }
+  from { left: var(--start-x); top: var(--start-y); }
+  to { left: var(--end-x); top: var(--end-y); }
+}
+
+@keyframes symbol-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 .switch-prompt { text-align: center; }
 .switch-prompt small { display: block; color: var(--muted); font-size: 0.8rem; }
@@ -238,6 +251,7 @@ h1 em { color: var(--lime); font-style: normal; }
 
 .answer-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.7rem; }
 .answer-button { min-height: 58px; padding: 0.8rem 1rem; border: 1px solid var(--line); border-radius: 14px; background: var(--panel-light); color: var(--text); font-weight: 700; }
+.answer-button:only-child { grid-column: 1 / -1; }
 .answer-button:hover { transform: translateY(-2px); border-color: rgba(199, 244, 91, 0.6); background: #1c304a; }
 .feedback { min-height: 1.5rem; margin: 0.75rem 0 0; text-align: center; color: var(--lime); font-size: 0.78rem; }
 .feedback.is-wrong { color: var(--coral); }
@@ -306,4 +320,6 @@ footer { min-height: 64px; display: flex; justify-content: space-between; align-
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  .memory-mover { animation: none !important; }
+  .memory-symbol { animation-duration: 8s !important; }
 }
