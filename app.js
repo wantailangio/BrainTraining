@@ -42,6 +42,7 @@
   let previousSymbolColor = "";
   let roundStats = [];
   let acceptingAnswer = false;
+  let challengeId = 0;
 
   const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
   const localDate = (date = new Date()) => {
@@ -126,7 +127,7 @@
     acceptingAnswer = true;
   }
 
-  function showMemory() {
+  function showMemory(currentChallengeId) {
     const same = previousSymbol && Math.random() < 0.48;
     let symbol = same ? previousSymbol : randomItem(symbols);
     if (!same && previousSymbol) {
@@ -165,7 +166,7 @@
     acceptingAnswer = false;
     symbolElement.classList.add("is-changing");
     window.setTimeout(() => {
-      if (state !== "running" || currentRound !== 1) return;
+      if (state !== "running" || currentRound !== 1 || challengeId !== currentChallengeId) return;
       symbolElement.textContent = symbol;
       symbolElement.style.setProperty("--symbol-color", symbolColor);
       previousSymbol = symbol;
@@ -192,19 +193,25 @@
 
   function nextChallenge() {
     if (state !== "running") return;
+    challengeId += 1;
+    const currentChallengeId = challengeId;
     els.feedback.innerHTML = "&nbsp;";
     els.feedback.classList.remove("is-wrong");
     if (currentRound === 0) showCalculation();
-    if (currentRound === 1) showMemory();
+    if (currentRound === 1) showMemory(currentChallengeId);
     if (currentRound === 2) showSwitch();
   }
 
   function submitAnswer(value) {
     if (!acceptingAnswer || state !== "running") return;
     acceptingAnswer = false;
+    const answeredChallengeId = challengeId;
+    const showNextChallenge = () => {
+      if (challengeId === answeredChallengeId) nextChallenge();
+    };
     if (value === "next") {
       els.feedback.innerHTML = "&nbsp;";
-      window.setTimeout(nextChallenge, 180);
+      window.setTimeout(showNextChallenge, 180);
       return;
     }
     attempts += 1;
@@ -219,7 +226,7 @@
       els.feedback.textContent = "焦らず、次へ";
       els.feedback.classList.add("is-wrong");
     }
-    window.setTimeout(nextChallenge, 260);
+    window.setTimeout(showNextChallenge, 260);
   }
 
   function tick() {
