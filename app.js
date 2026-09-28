@@ -3,7 +3,7 @@
 
   const SESSION_SECONDS = 180;
   const ROUND_SECONDS = 60;
-  const symbols = ["▲", "■", "◆", "✦", "⬟"];
+  const symbols = ["▲", "■", "●", "✦", "⬟"];
   const symbolColors = ["#c7f45b", "#46d7e9", "#ff715b", "#bd8cff"];
 
   const els = {
@@ -135,7 +135,7 @@
     }
     let symbolColor = randomItem(symbolColors);
     while (symbolColor === previousSymbolColor) symbolColor = randomItem(symbolColors);
-    els.instruction.textContent = "動く記号を追って、ひとつ前と比べる";
+    els.instruction.textContent = "色や向きではなく、図形をひとつ前と比べる";
     let symbolElement = els.challenge.querySelector(".memory-symbol");
     if (!symbolElement) {
       let startX = Math.floor(Math.random() * 26) + 5;
